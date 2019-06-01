@@ -4,7 +4,8 @@ I have learned how to apply perspective projection along with per vertex and per
 
 ## Tasks are as follows
 1. Generateing the geometry of an approximate sphere by tetrahedron subdivision.
-2. Object related controls:
+
+2. Object related controls :
 
     a. Decrease/increase the number of tetrahedron subdivisions through buttons.
   
@@ -18,7 +19,7 @@ I have learned how to apply perspective projection along with per vertex and per
   
     b. Camera position X, Y, Z: Change the camera position (eye point).  
   
-4. Lighting related controls:
+4. Lighting related controls :
 
    a. Change the light position through sliders.
   
@@ -33,6 +34,7 @@ I have learned how to apply perspective projection along with per vertex and per
 ## Model 
 
 This is the final model.
+
 
 
 ![Screenshot from 2019-06-01 15-36-43](https://user-images.githubusercontent.com/26312757/58748560-4da8c880-8483-11e9-8563-3493f69bd89f.png)
