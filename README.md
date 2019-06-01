@@ -30,3 +30,9 @@ I have learned how to apply perspective projection along with per vertex and per
     
        iii.Wireframe: Draw the wireframe representation of the sphere.
     
+## Model 
+
+This is the final model.
+
+
+![Screenshot from 2019-06-01 15-36-43](https://user-images.githubusercontent.com/26312757/58748560-4da8c880-8483-11e9-8563-3493f69bd89f.png)
