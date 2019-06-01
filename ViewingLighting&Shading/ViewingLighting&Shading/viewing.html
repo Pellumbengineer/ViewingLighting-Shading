@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>Homework 3</title>
+
+<script id="vertex-gouraud" type="x-shader/x-vertex">
+	// assume both position and normal are in homogeneous form
+	
+		attribute vec4 vPosition;
+		attribute vec4 vNormal;
+		
+		uniform vec4 ambientProduct, diffuseProduct, specularProduct;
+		uniform vec4 lightPosition;
+		uniform float shininess;
+		
+		uniform mat4 modelViewMatrix;
+		uniform mat4 projectionMatrix;
+		uniform mat3 normalMatrix;
+		
+		varying vec4 fColor;
+		uniform vec4 color;
+		
+		void
+		main()
+		{
+			// Compute terms in the illumination equation
+			vec4 ambient = ambientProduct;
+			
+			// pos is vertex position in eye coordinates    
+			vec3 pos = (modelViewMatrix * vPosition).xyz;
+			
+			// vector from vertex position to light source    
+			vec3 L;    
+			// check for directional light    
+			if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
+			else L = normalize( lightPosition.xyz - pos );    
+		
+			// Transform vertex normal into eye coordinates    
+			vec3 N = normalize( normalMatrix*vNormal.xyz);   
+		
+			float Kd = max( dot(L, N), 0.0 );
+			vec4  diffuse = Kd*diffuseProduct;
+			
+			// Because the eye point the is at the orgin
+			// the vector from the vertex position to the eye is    	
+			vec3 V = -normalize( pos );
+			
+			// halfway vector    
+			vec3 H = normalize( L + V );
+		
+			float Ks = pow( max(dot(N, H), 0.0), shininess );
+			vec4  specular = Ks * specularProduct;
+			
+			if( dot(L, N) < 0.0 ) {
+				specular = vec4(0.0, 0.0, 0.0, 1.0);
+			} 
+		
+			gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+			
+			fColor = ambient + diffuse +specular;
+			fColor.a = 1.0;		
+			
+		}
+</script>
+<script id="fragment-gouraud" type="x-shader/x-fragment">
+	
+	precision mediump float;
+
+	varying vec4 fColor;
+	
+	
+	void
+	main()
+	{
+	
+		gl_FragColor = fColor;
+	
+	}
+
+</script>
+
+<script id="vertex-phong" type="x-shader/x-vertex">
+	
+
+attribute vec4 vPosition;
+attribute vec4 vNormal;
+
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat3 normalMatrix;
+
+uniform vec4 lightPosition;
+
+
+varying vec3 N, L, V;
+
+void main()
+{
+    vec3 pos = (modelViewMatrix * vPosition).xyz;
+    
+    // check for directional light    
+    if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
+    else L = normalize( lightPosition.xyz - pos );
+    
+    V =  -normalize(pos);
+    N = normalize( normalMatrix*vNormal.xyz);
+
+    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    
+}
+
+</script>
+
+
+<script id="fragment-phong" type="x-shader/x-fragment">
+
+	precision mediump float;
+
+uniform vec4 ambientProduct;
+uniform vec4 diffuseProduct;
+uniform vec4 specularProduct;
+uniform float shininess;
+varying vec3 N, L, V;
+
+
+
+
+void main()
+{    
+    vec4 ambient = ambientProduct;
+
+    float Kd = max( dot(L, N), 0.0 );
+    vec4  diffuse = Kd*diffuseProduct;
+
+	vec3 H = normalize( L + V );
+    float Ks = pow( max(dot(N, H), 0.0), shininess );
+    vec4  specular = Ks * specularProduct;
+    
+    if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+    vec4 fColor = ambient + diffuse +specular;
+    fColor.a = 1.0;
+
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="viewing.js"></script>
+</head>
+
+<body style="background-color:powderblue;">
+
+<div>
+Pellumb Baboci , 160315049 <br> Ant Kaynak , 150315004 </br>
+</div>
+<table>
+	<td>
+	<canvas id="gl-canvas" width="650" height="650">
+		Oops ... your browser doesn't support the HTML5 canvas element
+	</canvas>
+	</td>
+	<td>	
+		<div> <strong>---- Controls ----</strong> </div><br>
+		<div> <strong></strong>Object Related: </strong></div><br>
+				
+		<p> </p>
+		<button id = "IncreaseSUB">Increase Subdivisions</button>
+		<button id = "DecreaseSUB">Decrease Subdivisions</button>
+
+
+		<div>
+		Material diffuse color R: 0<input id="MaterialDiffuseColorR:" type="range"
+		 min="0" max="1" step="0.05" value="0.5" />1
+		</div>
+		<div>
+		Material diffuse color G: 0<input id="MaterialDiffuseColorG:" type="range"
+		 min="0" max="1" step="0.05" value="0.5" />1
+		</div>
+		<div>
+		Material diffuse color B: 0<input id="MaterialDiffuseColorB:" type="range"
+		 min="0.1" max="0.5" step="0.05" value="0.5" />1
+		</div>
+		<div>
+		Beta: 1<input id="beta" type="range"
+		 min="1" max="100" step="0.05" value="0.1" />100
+		</div>
+		
+		<br>
+		
+		<div> <strong>---- Camera Related ----</strong> </div><br>
+		<div>
+		FOVY: 30<input id="FOVY" type="range"
+		 min="30" max="120" step="5" value="45" />120
+		</div> 
+		<div>
+		Camera Position X: -10<input id="camerapositionX" type="range"
+		 min="-10" max="10" step="1" value="0" />10
+		</div> 
+		Camera Position Y: -10<input id="camerapositionY" type="range"
+		 min="-10" max="10" step="1" value="0" />10
+		</div>
+		<div>
+		Camera Position Z: -10<input id="camerapositionZ" type="range"
+		 min="-10" max="10" step="1" value="0" />10
+		</div>
+		<br>
+		
+		<div> <strong>---- Lighting Related ----</strong> </div><br>
+		<div>
+			Light Position X: -1<input id="lightpositionX" type="range"
+			 min="-1" max="10" step="0.05" value="0" />1
+			</div> 
+			Light Position Y: -1<input id="lightpositionY" type="range"
+			 min="-1" max="1" step="0.05" value="0" />1
+			</div>
+			<div>
+			Light Position Z: -1<input id="lightpositionZ" type="range"
+			 min="-1" max="1" step="0.05" value="0" />1
+			</div>
+		<br>
+
+		<div> ---- Shading Type ---- </div><br>			
+		<select id = "shadingMenu" size = "3">
+			<option value = "0" >gouraud</option>
+			<option value = "1">phong</option>
+			<option value = "2">wireframe</option>
+			</select>
+
+		
+	</td>
+	
+</table>
+<div>
+</body>
+</html>
